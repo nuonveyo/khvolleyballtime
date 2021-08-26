@@ -1,0 +1,75 @@
+version: 0.2
+
+  #env:
+  #variables:
+  # key: "value"
+  # key: "value"
+  #parameter-store:
+  # key: "value"
+  # key: "value"
+  #secrets-manager:
+  # key: secret-id:json-key:version-stage:version-id
+  # key: secret-id:json-key:version-stage:version-id
+  #exported-variables:
+  # - variable
+  # - variable
+  #git-credential-helper: yes
+  #batch:
+  #fast-fail: true
+  #build-list:
+  #build-matrix:
+#build-graph:
+phases:
+  install:
+    #If you use the Ubuntu standard image 2.0 or later, you must specify runtime-versions.
+    #If you specify runtime-versions and use an image other than Ubuntu standard image 2.0, the build fails.
+    runtime-versions:
+      name: 7.3
+      # name: version
+      #commands:
+      # - command
+      # - command
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - aws --version
+      # login to Elastic container registry
+      - $(aws ecr get-login-password --region us-east-2)
+      - REPOSITORY_URI=916825473198.dkr.ecr.us-east-2.amazonaws.com/devops
+      - IMAGE_TAG=1.0
+  build:
+    commands:
+      - echo Build started on `date`
+      - echo installing composer..
+      - composer install
+      - echo creating .env file..
+      - cp .env.example .env
+      - echo generating app key
+      - php artisan key:generate
+      - echo Building the Docker image...
+      - docker build -t $REPOSITORY_URI:latest .
+      - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - echo Pushing the Docker image...
+      - docker image ls -a
+      - docker push $REPOSITORY_URI:$IMAGE_TAG
+      #reports:
+      #report-name-or-arn:
+      #files:
+      # - location
+      # - location
+    #base-directory: location
+    #discard-paths: yes
+    #file-format: JunitXml | CucumberJson
+    #artifacts:
+    #files:
+    # - location
+    # - location
+    #name: $(date +%Y-%m-%d)
+    #discard-paths: yes
+    #base-directory: location
+    #cache:
+    #paths:
+    # - paths
