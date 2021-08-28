@@ -27,3 +27,6 @@ COPY . ./
 #RUN chown -R www-data:www-data /var/www/html && a2enmod rewrite
 RUN chown -R www-data: *
 RUN chown -R 755 *
+
+EXPOSE 8080
+CMD apache2-foreground
